@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { DefinePlugin } = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 require('dotenv').config({
   path: path.join(process.cwd(), process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env')
@@ -24,7 +25,10 @@ const config = {
     open: true,
     host: "localhost",
     watchFiles: ["src/pages/*.html"],
-    hot: true
+    hot: true,
+    static: {
+      directory: path.join(__dirname, 'src/public'),
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -32,6 +36,15 @@ const config = {
     }),
 
     new MiniCssExtractPlugin(),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { 
+          from: 'src/public',
+          to: ''
+        }
+      ],
+    }),
 
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
@@ -49,15 +62,21 @@ const config = {
       },
       {
         test: /\.s[ac]ss$/i,
-        use: [stylesHandler, "css-loader", "postcss-loader", "resolve-url-loader", {
-          loader: "sass-loader",
-          options: {
-            sourceMap: true,
-            sassOptions: {
-              includePaths: ["src/scss"]
+        use: [
+          stylesHandler,
+          "css-loader",
+          "postcss-loader",
+          "resolve-url-loader",
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+              sassOptions: {
+                includePaths: ["src/scss"]
+              }
             }
           }
-        }],
+        ],
       },
       {
         test: /\.css$/i,
