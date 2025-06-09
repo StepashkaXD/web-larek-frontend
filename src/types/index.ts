@@ -66,12 +66,16 @@ export interface IModal extends IComponent {
   close(): void;
 }
 
-export type EventCallback = (...args: any[]) => void;
+export interface IForm extends IComponent {
+  validate(): boolean;
+  onInput(field: string, value: string): void;
+  clear(): void;
+}
 
-export interface IEventEmitter {
-  on(event: string, callback: EventCallback): void;
-  off(event: string, callback: EventCallback): void;
-  emit(event: string, ...args: any[]): void;
+export interface IEvents {
+  on<T extends object>(event: string | RegExp, callback: (data: T) => void): void;
+  emit<T extends object>(event: string, data?: T): void;
+  trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
 }
 
 export interface ApiResponse<T> {
@@ -80,16 +84,22 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export interface IApiClient {
-  get<T>(endpoint: string): Promise<ApiResponse<T>>;
-  post<T>(endpoint: string, data: any): Promise<ApiResponse<T>>;
-  put<T>(endpoint: string, data: any): Promise<ApiResponse<T>>;
-  delete<T>(endpoint: string): Promise<ApiResponse<T>>;
+export type ApiListResponse<Type> = {
+  total: number;
+  items: Type[];
+};
+
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export interface IApiService {
+  get<T extends object>(uri: string): Promise<T>;
+  post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
 export interface IProductModel {
-  getProducts(): Promise<IProductList>;
-  getProduct(id: string): Promise<IProductItem>;
+  setProducts(items: IProductItem[]): void;
+  getProduct(id: string): IProductItem | undefined;
+  getProducts(): IProductItem[];
 }
 
 export interface ICartModel {
@@ -100,6 +110,7 @@ export interface ICartModel {
 }
 
 export interface IOrderModel {
-  createOrder(form: IOrderLot): Promise<IOrderResult>;
-  getOrders(): Promise<IOrder[]>;
+  setOrder(order: IOrderLot): void;
+  getOrder(): IOrderLot;
+  clearOrder(): void;
 }
